@@ -41,9 +41,9 @@ namespace Hillinworks.OperationFramework
 			double progressShare = 0,
 			bool shareCancellation = true)
 		{
-			using (var childContest = context.StartChildOperation(name, progressShare, shareCancellation))
+			using (var childContext = context.StartChildOperation(name, progressShare, shareCancellation))
 			{
-				operation(childContest);
+				operation(childContext);
 			}
 		}
 
@@ -54,9 +54,9 @@ namespace Hillinworks.OperationFramework
 			double progressShare = 0,
 			bool shareCancellation = true)
 		{
-			using (var childContest = context.StartChildOperation(name, progressShare, shareCancellation))
+			using (var childContext = context.StartChildOperation(name, progressShare, shareCancellation))
 			{
-				return operation(childContest);
+				return operation(childContext);
 			}
 		}
 

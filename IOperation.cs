@@ -2,7 +2,7 @@
 {
 	public interface IOperation
 	{
-		void Execute(IStatusContext context);
+		void Execute(IStatusContext statusContext);
 	}
 
 	public interface IOperation<out TResult>
