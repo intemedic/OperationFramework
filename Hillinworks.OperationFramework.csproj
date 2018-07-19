@@ -40,10 +40,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IAsyncOperation.cs" />
     <Compile Include="IOperation.cs" />
     <Compile Include="IOperationStatus.cs" />
     <Compile Include="IStatusContext.cs" />
-    <Compile Include="IStatusContextExtensions.cs" />
+    <Compile Include="StatusContextExtensions.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="MessageReceivedEventArgs.cs" />
     <Compile Include="OperationContext.cs" />
