@@ -43,7 +43,7 @@
     <Compile Include="IAsyncOperation.cs" />
     <Compile Include="IOperation.cs" />
     <Compile Include="IOperationStatus.cs" />
-    <Compile Include="IStatusContext.cs" />
+    <Compile Include="IOperationContext.cs" />
     <Compile Include="StatusContextExtensions.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="MessageReceivedEventArgs.cs" />

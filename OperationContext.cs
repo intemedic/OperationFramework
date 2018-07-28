@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
 namespace Hillinworks.OperationFramework
 {
 	[DebuggerDisplay("Operation <{" + nameof(FullName) + "}>")]
-	public class OperationContext : IStatusContext, IOperationStatus
+	public class OperationContext : IOperationContext, IOperationStatus
 	{
 		public OperationContext(string name)
 		{
@@ -21,6 +22,7 @@ namespace Hillinworks.OperationFramework
 		{
 			this.Name = name;
 			this.Parent = parent;
+		    this.Parent.ChildrenList.Add(this);
 			this.ProgressShare = progressShare;
 
 			this.CancellationTokenSource = shareCancellation
@@ -33,6 +35,12 @@ namespace Hillinworks.OperationFramework
 
 		private TimeSpan? DeterminedElapsedTime { get; set; }
 		private OperationContext Parent { get; }
+
+	    private List<OperationContext> ChildrenList { get; }
+	        = new List<OperationContext>();
+
+	    public IReadOnlyList<OperationContext> Children => this.ChildrenList;
+
 		private double ProgressShare { get; }
 
 		private CancellationTokenSource CancellationTokenSource { get; }
@@ -56,7 +64,7 @@ namespace Hillinworks.OperationFramework
 
 		public string FullName => this.Parent == null ? this.Name : $"{this.Parent.FullName}::{this.Name}";
 
-		public IStatusContext StartChildOperation(string name, double progressShare, bool shareCancellation)
+		public IOperationContext StartChildOperation(string name, double progressShare, bool shareCancellation)
 		{
 			this.CheckAvailability();
 

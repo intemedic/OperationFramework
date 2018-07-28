@@ -8,11 +8,11 @@ namespace Hillinworks.OperationFramework
 {
     public interface IAsyncOperation
     {
-        Task ExecuteAsync(IStatusContext statusContext);
+        Task ExecuteAsync(IOperationContext statusContext);
     }
 
     public interface IAsyncOperation<TResult>
     {
-        Task<TResult> ExecuteAsync(IStatusContext statusContext);
+        Task<TResult> ExecuteAsync(IOperationContext statusContext);
     }
 }

@@ -2,11 +2,11 @@
 {
 	public interface IOperation
 	{
-		void Execute(IStatusContext statusContext);
+		void Execute(IOperationContext statusContext);
 	}
 
 	public interface IOperation<out TResult>
 	{
-		TResult Execute(IStatusContext context);
+		TResult Execute(IOperationContext context);
 	}
 }

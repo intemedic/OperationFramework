@@ -5,40 +5,40 @@ namespace Hillinworks.OperationFramework
 {
     public static class StatusContextExtensions
     {
-        public static void LogDebug(this IStatusContext context, string message)
+        public static void LogDebug(this IOperationContext context, string message)
         {
             context.Log(LogLevel.Debug, message);
         }
 
-        public static void LogInfo(this IStatusContext context, string message)
+        public static void LogInfo(this IOperationContext context, string message)
         {
             context.Log(LogLevel.Info, message);
         }
 
-        public static void LogWarning(this IStatusContext context, string message)
+        public static void LogWarning(this IOperationContext context, string message)
         {
             context.Log(LogLevel.Warning, message);
         }
 
-        public static void LogError(this IStatusContext context, string message)
+        public static void LogError(this IOperationContext context, string message)
         {
             context.Log(LogLevel.Error, message);
         }
 
-        public static void LogFatal(this IStatusContext context, string message)
+        public static void LogFatal(this IOperationContext context, string message)
         {
             context.Log(LogLevel.Fatal, message);
         }
 
-        public static IOperationStatus AsOperationStatus(this IStatusContext context)
+        public static IOperationStatus AsOperationStatus(this IOperationContext context)
         {
             return context as IOperationStatus;
         }
 
         public static void StartChildOperation(
-            this IStatusContext context,
+            this IOperationContext context,
             string name,
-            Action<IStatusContext> operation,
+            Action<IOperationContext> operation,
             double progressShare = 0,
             bool shareCancellation = true)
         {
@@ -49,9 +49,9 @@ namespace Hillinworks.OperationFramework
         }
 
         public static TResult StartChildOperation<TResult>(
-            this IStatusContext context,
+            this IOperationContext context,
             string name,
-            Func<IStatusContext, TResult> operation,
+            Func<IOperationContext, TResult> operation,
             double progressShare = 0,
             bool shareCancellation = true)
         {
@@ -62,9 +62,9 @@ namespace Hillinworks.OperationFramework
         }
 
         public static async Task StartChildOperationAsync(
-            this IStatusContext context,
+            this IOperationContext context,
             string name,
-            Func<IStatusContext, Task> operation,
+            Func<IOperationContext, Task> operation,
             double progressShare = 0,
             bool shareCancellation = true)
         {
@@ -75,9 +75,9 @@ namespace Hillinworks.OperationFramework
         }
 
         public static async Task<TResult> StartChildOperationAsync<TResult>(
-            this IStatusContext context,
+            this IOperationContext context,
             string name,
-            Func<IStatusContext, Task<TResult>> operation,
+            Func<IOperationContext, Task<TResult>> operation,
             double progressShare = 0,
             bool shareCancellation = true)
         {
@@ -88,7 +88,7 @@ namespace Hillinworks.OperationFramework
         }
 
         public static void StartChildOperation(
-            this IStatusContext context,
+            this IOperationContext context,
             string name,
             IOperation operation,
             double progressShare = 0,
@@ -98,7 +98,7 @@ namespace Hillinworks.OperationFramework
         }
 
         public static TResult StartChildOperation<TResult>(
-            this IStatusContext context,
+            this IOperationContext context,
             string name,
             IOperation<TResult> operation,
             double progressShare = 0,
@@ -108,7 +108,7 @@ namespace Hillinworks.OperationFramework
         }
 
         public static void StartChildOperation<TOperation>(
-            this IStatusContext context,
+            this IOperationContext context,
             string name,
             double progressShare = 0,
             bool shareCancellation = true)
@@ -118,7 +118,7 @@ namespace Hillinworks.OperationFramework
         }
 
         public static TResult StartChildOperation<TOperation, TResult>(
-            this IStatusContext context,
+            this IOperationContext context,
             string name,
             double progressShare = 0,
             bool shareCancellation = true)
@@ -128,7 +128,7 @@ namespace Hillinworks.OperationFramework
         }
 
         public static Task StartChildOperationAsync(
-            this IStatusContext context,
+            this IOperationContext context,
             string name,
             IAsyncOperation operation,
             double progressShare = 0,
@@ -138,7 +138,7 @@ namespace Hillinworks.OperationFramework
         }
 
         public static Task<TResult> StartChildOperationAsync<TResult>(
-            this IStatusContext context,
+            this IOperationContext context,
             string name,
             IAsyncOperation<TResult> operation,
             double progressShare = 0,
@@ -148,7 +148,7 @@ namespace Hillinworks.OperationFramework
         }
 
         public static void StartChildOperationAsync<TOperation>(
-            this IStatusContext context,
+            this IOperationContext context,
             string name,
             double progressShare = 0,
             bool shareCancellation = true)
@@ -158,7 +158,7 @@ namespace Hillinworks.OperationFramework
         }
 
         public static Task<TResult> StartChildOperationAsync<TOperation, TResult>(
-            this IStatusContext context,
+            this IOperationContext context,
             string name,
             double progressShare = 0,
             bool shareCancellation = true)
