@@ -23,7 +23,13 @@ namespace Hillinworks.OperationFramework
 			this.Name = name;
 			this.Parent = parent;
 		    this.Parent.ChildrenList.Add(this);
-			this.ProgressShare = progressShare;
+
+		    if (progressShare < 0 || progressShare > 1)
+		    {
+		        throw new ArgumentOutOfRangeException(nameof(progressShare));
+		    }
+
+            this.ProgressShare = progressShare;
 
 			this.CancellationTokenSource = shareCancellation
 				? this.Parent.CancellationTokenSource
