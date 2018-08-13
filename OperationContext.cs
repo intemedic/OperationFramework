@@ -61,7 +61,7 @@ namespace Hillinworks.OperationFramework
 
 		public bool IsCancelled => this.CancellationTokenSource.IsCancellationRequested;
 		public DateTime StartTime { get; private set; }
-		public TimeSpan ElapsedTime => this.DeterminedElapsedTime ?? DateTime.Now - this.StartTime;
+		public TimeSpan Duration => this.DeterminedElapsedTime ?? DateTime.Now - this.StartTime;
 
 
 		public CancellationToken CancellationToken => this.CancellationTokenSource.Token;
@@ -84,7 +84,7 @@ namespace Hillinworks.OperationFramework
 			this.CheckAvailability();
 
 			this.DeterminedElapsedTime = DateTime.Now - this.StartTime;
-			Trace.WriteLine($"<{this.Name}> completed at {DateTime.Now}, {this.ElapsedTime} elapsed");
+			Trace.WriteLine($"<{this.Name}> completed at {DateTime.Now}, {this.Duration} elapsed");
 
 			this.ReportProgress(1.0);
 
@@ -97,7 +97,7 @@ namespace Hillinworks.OperationFramework
 			this.CheckAvailability();
 
 			this.DeterminedElapsedTime = DateTime.Now - this.StartTime;
-			Trace.WriteLine($"<{this.Name}> cancelled at {DateTime.Now}, {this.ElapsedTime} elapsed");
+			Trace.WriteLine($"<{this.Name}> cancelled at {DateTime.Now}, {this.Duration} elapsed");
 
 			if (this.Parent == null || this.CancellationTokenSource != this.Parent.CancellationTokenSource)
 			{
@@ -138,7 +138,7 @@ namespace Hillinworks.OperationFramework
 		{
 			this.CheckAvailability();
 
-			Debug.Assert(progress >= 0 && progress < 1.01);
+			//Debug.Assert(progress >= 0 && progress < 1.01);
 
 			progress = Math.Min(Math.Max(progress, 0), 1);
 

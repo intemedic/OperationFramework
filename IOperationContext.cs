@@ -9,7 +9,7 @@ namespace Hillinworks.OperationFramework
 		string Name { get; }
 		string FullName { get; }
 		DateTime StartTime { get; }
-		TimeSpan ElapsedTime { get; }
+		TimeSpan Duration { get; }
 
 		void Log(LogLevel level, string message);
 
