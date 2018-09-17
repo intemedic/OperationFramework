@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Hillinworks.OperationFramework
@@ -35,6 +36,7 @@ namespace Hillinworks.OperationFramework
             return context as IOperationStatus;
         }
 
+        [DebuggerStepThrough]
         public static void StartChildOperation(
             this IOperationContext context,
             string name,
@@ -48,6 +50,7 @@ namespace Hillinworks.OperationFramework
             }
         }
 
+        [DebuggerStepThrough]
         public static TResult StartChildOperation<TResult>(
             this IOperationContext context,
             string name,
@@ -61,6 +64,7 @@ namespace Hillinworks.OperationFramework
             }
         }
 
+        [DebuggerStepThrough]
         public static async Task StartChildOperationAsync(
             this IOperationContext context,
             string name,
@@ -74,6 +78,7 @@ namespace Hillinworks.OperationFramework
             }
         }
 
+        [DebuggerStepThrough]
         public static async Task<TResult> StartChildOperationAsync<TResult>(
             this IOperationContext context,
             string name,
@@ -87,6 +92,7 @@ namespace Hillinworks.OperationFramework
             }
         }
 
+        [DebuggerStepThrough]
         public static void StartChildOperation(
             this IOperationContext context,
             string name,
@@ -97,6 +103,7 @@ namespace Hillinworks.OperationFramework
             context.StartChildOperation(name, operation.Execute, progressShare, shareCancellation);
         }
 
+        [DebuggerStepThrough]
         public static TResult StartChildOperation<TResult>(
             this IOperationContext context,
             string name,
@@ -107,6 +114,7 @@ namespace Hillinworks.OperationFramework
             return context.StartChildOperation(name, operation.Execute, progressShare, shareCancellation);
         }
 
+        [DebuggerStepThrough]
         public static void StartChildOperation<TOperation>(
             this IOperationContext context,
             string name,
@@ -117,6 +125,7 @@ namespace Hillinworks.OperationFramework
             context.StartChildOperation(name, new TOperation(), progressShare, shareCancellation);
         }
 
+        [DebuggerStepThrough]
         public static TResult StartChildOperation<TOperation, TResult>(
             this IOperationContext context,
             string name,
@@ -127,6 +136,7 @@ namespace Hillinworks.OperationFramework
             return context.StartChildOperation(name, new TOperation(), progressShare, shareCancellation);
         }
 
+        [DebuggerStepThrough]
         public static Task StartChildOperationAsync(
             this IOperationContext context,
             string name,
@@ -137,6 +147,7 @@ namespace Hillinworks.OperationFramework
             return context.StartChildOperationAsync(name, operation.ExecuteAsync, progressShare, shareCancellation);
         }
 
+        [DebuggerStepThrough]
         public static Task<TResult> StartChildOperationAsync<TResult>(
             this IOperationContext context,
             string name,
@@ -147,6 +158,7 @@ namespace Hillinworks.OperationFramework
             return context.StartChildOperationAsync(name, operation.ExecuteAsync, progressShare, shareCancellation);
         }
 
+        [DebuggerStepThrough]
         public static void StartChildOperationAsync<TOperation>(
             this IOperationContext context,
             string name,
@@ -157,6 +169,7 @@ namespace Hillinworks.OperationFramework
             context.StartChildOperationAsync(name, new TOperation(), progressShare, shareCancellation);
         }
 
+        [DebuggerStepThrough]
         public static Task<TResult> StartChildOperationAsync<TOperation, TResult>(
             this IOperationContext context,
             string name,
