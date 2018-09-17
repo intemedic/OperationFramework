@@ -3,8 +3,8 @@ using System.Threading;
 
 namespace Hillinworks.OperationFramework
 {
-	public interface IOperationContext : IDisposable
-	{
+	public interface IOperationContext : IDisposable, IProfilingContext
+    {
 		CancellationToken CancellationToken { get; }
 		string Name { get; }
 		string FullName { get; }
@@ -44,5 +44,6 @@ namespace Hillinworks.OperationFramework
 		/// <param name="shareCancellation">Whether cancelling the child operation also cancels the current operation</param>
 		/// <returns>A child status context for the child operation</returns>
 		IOperationContext StartChildOperation(string name, double progressShare = 0, bool shareCancellation = true);
+
 	}
 }
