@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Hillinworks.OperationFramework
 {
@@ -13,7 +14,6 @@ namespace Hillinworks.OperationFramework
             this.Name = name;
 
             this.CancellationTokenSource = new CancellationTokenSource();
-            this.CancellationToken.Register(this.OnCancelled);
 
             this.Start();
         }
@@ -35,8 +35,23 @@ namespace Hillinworks.OperationFramework
                 ? this.Parent.CancellationTokenSource
                 : new CancellationTokenSource();
 
-            this.CancellationToken.Register(this.OnCancelled);
             this.Start();
+        }
+
+        private List<IOperationEventHandler> OperationEventHandlers { get; }
+            = new List<IOperationEventHandler>();
+
+        public void AddEventHandler(IOperationEventHandler handler)
+        {
+            this.OperationEventHandlers.Add(handler);
+        }
+
+        private void RaiseOperationEvent(Action<IOperationEventHandler> action)
+        {
+            foreach (var handler in this.OperationEventHandlers)
+            {
+                action(handler);
+            }
         }
 
         private TimeSpan? DeterminedElapsedTime { get; set; }
@@ -112,15 +127,30 @@ namespace Hillinworks.OperationFramework
             return @event;
         }
 
+        /// <summary>
+        /// Commit this operation and mark it as completed.
+        /// </summary>
+        /// <remarks>
+        /// This can be called if you want to manually control the completion of an operation.
+        /// For <see cref="IOperation.Execute(IOperationContext)"/> based operations, this will be
+        /// automatically called when the execution is finished without exception.
+        /// </remarks>
         public void Commit()
         {
+            if (this.IsCompleted)
+            {
+                return;
+            }
+
             this.CheckAvailability();
 
             this.DeterminedElapsedTime = DateTime.Now - this.StartTime;
             Trace.WriteLine($"<{this.Name}> completed at {DateTime.Now}, {this.Duration} elapsed");
 
             this.ReportProgress(1.0);
+            this.IsCompleted = true;
 
+            this.RaiseOperationEvent(h => h.OnCompleted());
             this.Completed?.Invoke(this, EventArgs.Empty);
             this.Parent?.OnChildComplete(this);
         }
@@ -150,6 +180,8 @@ namespace Hillinworks.OperationFramework
                 return;
             }
 #endif
+            this.RaiseOperationEvent(h => h.OnMessageReceived(level, message));
+
             this.MessageReceived?.Invoke(this, new MessageReceivedEventArgs(level, message));
         }
 
@@ -164,6 +196,7 @@ namespace Hillinworks.OperationFramework
         {
             this.Log(LogLevel.Fatal, message);
             this.IsFailed = true;
+            this.RaiseOperationEvent(h => h.OnFailed(message, innerException));
             this.Failed?.Invoke(this, EventArgs.Empty);
             throw new OperationFatalErrorException(this, message, innerException);
         }
@@ -183,6 +216,7 @@ namespace Hillinworks.OperationFramework
             }
 
             this.Progress = progress;
+            this.RaiseOperationEvent(h => h.OnProgressChanged(this.Progress));
             this.ProgressChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -194,6 +228,7 @@ namespace Hillinworks.OperationFramework
 
         public double Progress { get; private set; }
         public bool IsFailed { get; private set; }
+        public bool IsCompleted { get; private set; }
 
         public event EventHandler ProgressChanged;
         public event EventHandler Failed;
@@ -203,7 +238,7 @@ namespace Hillinworks.OperationFramework
 
         public bool IsCancelled => this.CancellationTokenSource.IsCancellationRequested;
 
-        public void Start()
+        private void Start()
         {
             this.CheckAvailability();
 
@@ -226,6 +261,7 @@ namespace Hillinworks.OperationFramework
 
         private void OnCancelled()
         {
+            this.RaiseOperationEvent(h => h.OnCompleted());
             this.Cancelled?.Invoke(this, EventArgs.Empty);
         }
 
@@ -239,6 +275,86 @@ namespace Hillinworks.OperationFramework
             if (disposing)
             {
                 this.Commit();
+            }
+        }
+
+        public void Execute(IOperation operation)
+        {
+            try
+            {
+                operation.Execute(this);
+                this.Commit();
+            }
+            catch (TaskCanceledException ex)
+            {
+                this.LogInfo($"Execution has been cancelled: {ex.Message}");
+                this.OnCancelled();
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this.OnFatalError($"Exception occurred when executing operation: {ex.Message}", ex);
+            }
+        }
+
+        public T Execute<T>(IOperation<T> operation)
+        {
+            try
+            {
+                var result = operation.Execute(this);
+                this.Commit();
+                return result;
+            }
+            catch (TaskCanceledException ex)
+            {
+                this.LogInfo($"Execution has been cancelled: {ex.Message}");
+                this.OnCancelled();
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this.OnFatalError($"Exception occurred when executing operation: {ex.Message}", ex);
+                throw;  // should not reach here
+            }
+        }
+
+        public async Task ExecuteAsync(IOperation operation)
+        {
+            try
+            {
+                await Task.Run(() => operation.Execute(this), this.CancellationToken);
+                this.Commit();
+            }
+            catch (TaskCanceledException ex)
+            {
+                this.LogInfo($"Execution has been cancelled: {ex.Message}");
+                this.OnCancelled();
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this.OnFatalError($"Exception occurred when executing operation: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<T> ExecuteAsync<T>(IOperation<T> operation)
+        {
+            try
+            {
+                var result = await Task.Run(() => operation.Execute(this), this.CancellationToken);
+                this.Commit();
+                return result;
+            }
+            catch (TaskCanceledException ex)
+            {
+                this.LogInfo($"Execution has been cancelled: {ex.Message}");
+                this.OnCancelled();
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this.OnFatalError($"Exception occurred when executing operation: {ex.Message}", ex);
+                throw;  // should not reach here
             }
         }
     }

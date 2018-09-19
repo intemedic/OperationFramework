@@ -43,9 +43,11 @@
   <ItemGroup>
     <Compile Include="IAsyncOperation.cs" />
     <Compile Include="IOperation.cs" />
+    <Compile Include="IOperationEventHandler.cs" />
     <Compile Include="IOperationStatus.cs" />
     <Compile Include="IOperationContext.cs" />
     <Compile Include="IProfilingContext.cs" />
+    <Compile Include="OperationEventHandler.cs" />
     <Compile Include="ProfileEvent.cs" />
     <Compile Include="StatusContextExtensions.cs" />
     <Compile Include="LogLevel.cs" />
