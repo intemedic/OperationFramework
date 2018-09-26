@@ -9,6 +9,8 @@ namespace Hillinworks.OperationFramework
     [DebuggerDisplay("Operation <{" + nameof(FullName) + "}>")]
     public class OperationContext : IOperationContext, IOperationStatus
     {
+        private bool? _isProfilingEnabled;
+
         public OperationContext(string name)
         {
             this.Name = name;
@@ -38,6 +40,12 @@ namespace Hillinworks.OperationFramework
             this.Start();
         }
 
+        public bool IsProfilingEnabled
+        {
+            get => _isProfilingEnabled ?? this.Parent?.IsProfilingEnabled ?? false;
+            set => _isProfilingEnabled = value;
+        }
+
         private List<IOperationEventHandler> OperationEventHandlers { get; }
             = new List<IOperationEventHandler>();
 
@@ -65,9 +73,7 @@ namespace Hillinworks.OperationFramework
         private double ProgressShare { get; }
 
         private CancellationTokenSource CancellationTokenSource { get; }
-
-
-        internal List<ProfileEvent> InternalEvents { get; } = new List<ProfileEvent>();
+        private List<ProfileEvent> InternalEvents { get; } = new List<ProfileEvent>();
 
         public IEnumerable<ProfileEvent> ExclusiveEvents
             => this.InternalEvents;
@@ -116,8 +122,17 @@ namespace Hillinworks.OperationFramework
             return new OperationContext(name, this, progressShare, shareCancellation);
         }
 
+        /// <summary>
+        /// Start a profiling event.
+        /// </summary>
+        /// <returns>The profiling event, or null if profiling is not enabled.</returns>
         public ProfileEvent StartProfileEvent(params string[] tags)
         {
+            if (!this.IsProfilingEnabled)
+            {
+                return null;
+            }
+
             var @event = new ProfileEvent(DateTime.Now, tags);
             lock (this.InternalEvents)
             {
