@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Hillinworks.OperationFramework
@@ -9,6 +10,30 @@ namespace Hillinworks.OperationFramework
         public static void LogDebug(this IOperationContext context, string message)
         {
             context.Log(LogLevel.Debug, message);
+        }
+
+        public static void LogDebug(
+            this IOperationContext context,
+            string actionDescription,
+            string firstParameter,
+            object firstValue,
+            params object[] restParameters)
+        {
+            if (restParameters.Length % 2 != 0)
+            {
+                throw new ArgumentException("parameters must be in pairs", nameof(restParameters));
+            }
+
+            var messageBuilder = new StringBuilder();
+            messageBuilder.AppendLine(actionDescription);
+            messageBuilder.AppendLine($"\t{firstParameter}={firstValue}");
+
+            for (var i = 0; i < restParameters.Length; i += 2)
+            {
+                messageBuilder.AppendLine($"\t{restParameters[i]}={restParameters[i + 1]}");
+            }
+
+            context.LogDebug(messageBuilder.ToString());
         }
 
         public static void LogInfo(this IOperationContext context, string message)

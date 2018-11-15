@@ -115,7 +115,7 @@ namespace Hillinworks.OperationFramework
 
         public IOperationContext StartChildOperation(string name, double progressShare, bool shareCancellation)
         {
-            this.CheckAvailability();
+            this.CheckAvailability(true);
 
             Trace.WriteLine(
                 $"<{this.Name}> Starting child operation <{name}> at {this.Progress * 100}%, Progress Share = {progressShare}, Share Cancellation = {shareCancellation}");
@@ -203,6 +203,8 @@ namespace Hillinworks.OperationFramework
 
         public void Log(LogLevel level, string message)
         {
+            this.CancellationToken.ThrowIfCancellationRequested();
+
             Trace.WriteLine($"<{this.FullName}> {level}: {message}");
             this.LogInternal(level, message);
         }
@@ -219,6 +221,8 @@ namespace Hillinworks.OperationFramework
         public void ReportProgress(double progress)
         {
             this.CheckAvailability();
+
+            this.CancellationToken.ThrowIfCancellationRequested();
 
             //Debug.Assert(progress >= 0 && progress < 1.01);
 
@@ -251,7 +255,7 @@ namespace Hillinworks.OperationFramework
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
         public event EventHandler Cancelled;
 
-        public bool IsCancelled => this.CancellationTokenSource.IsCancellationRequested;
+        public bool IsCancelled { get; private set; }
 
         private void Start()
         {
@@ -266,16 +270,24 @@ namespace Hillinworks.OperationFramework
             Trace.WriteLine($"<{this.Name}> started at {DateTime.Now}");
         }
 
-        private void CheckAvailability()
+        private bool CheckAvailability(bool throwException = true)
         {
             if (this.IsFailed || this.IsCancelled)
             {
-                throw new InvalidOperationException("this operation is already failed or cancelled");
+                if (throwException)
+                {
+                    throw new InvalidOperationException("this operation is already failed or cancelled");
+                }
+
+                return false;
             }
+
+            return true;
         }
 
         private void OnCancelled()
         {
+            this.IsCancelled = true;
             this.RaiseOperationEvent(h => h.OnCompleted());
             this.Cancelled?.Invoke(this, EventArgs.Empty);
         }
@@ -289,7 +301,10 @@ namespace Hillinworks.OperationFramework
         {
             if (disposing)
             {
-                this.Commit();
+                if (!this.IsCancelled && !this.IsFailed)
+                {
+                    this.Commit();
+                }
             }
         }
 
@@ -300,7 +315,7 @@ namespace Hillinworks.OperationFramework
                 operation.Execute(this);
                 this.Commit();
             }
-            catch (TaskCanceledException ex)
+            catch (OperationCanceledException ex)
             {
                 this.LogInfo($"Execution has been cancelled: {ex.Message}");
                 this.OnCancelled();
@@ -320,7 +335,7 @@ namespace Hillinworks.OperationFramework
                 this.Commit();
                 return result;
             }
-            catch (TaskCanceledException ex)
+            catch (OperationCanceledException ex)
             {
                 this.LogInfo($"Execution has been cancelled: {ex.Message}");
                 this.OnCancelled();
@@ -340,7 +355,7 @@ namespace Hillinworks.OperationFramework
                 await Task.Run(() => operation.Execute(this), this.CancellationToken);
                 this.Commit();
             }
-            catch (TaskCanceledException ex)
+            catch (OperationCanceledException ex)
             {
                 this.LogInfo($"Execution has been cancelled: {ex.Message}");
                 this.OnCancelled();
@@ -360,15 +375,28 @@ namespace Hillinworks.OperationFramework
                 this.Commit();
                 return result;
             }
-            catch (TaskCanceledException ex)
+            catch (OperationCanceledException ex)
             {
-                this.LogInfo($"Execution has been cancelled: {ex.Message}");
+                this.LogInfo($"Execution has been cancelled: {ex.FormatMessage()}");
                 this.OnCancelled();
                 throw;
             }
             catch (Exception ex)
             {
-                this.OnFatalError($"Exception occurred when executing operation: {ex.Message}", ex);
+                if (ex is AggregateException aggregateException)
+                {
+                    foreach (var innerException in aggregateException.InnerExceptions)
+                    {
+                        if (innerException is OperationCanceledException)
+                        {
+                            this.LogInfo($"Execution has been cancelled: {ex.FormatMessage()}");
+                            this.OnCancelled();
+                            throw;
+                        }
+                    }
+                }
+
+                this.OnFatalError($"Exception occurred when executing operation: {ex.FormatMessage()}", ex);
                 throw;  // should not reach here
             }
         }
