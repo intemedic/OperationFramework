@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -182,7 +183,10 @@ namespace Hillinworks.OperationFramework
                 Trace.WriteLine($"<{this.Name}> Cancellation has been requested");
             }
 
-            this.CancellationTokenSource.Cancel(true);
+            if (!this.CancellationTokenSource.IsCancellationRequested)
+            {
+                this.CancellationTokenSource.Cancel(true);
+            }
         }
 
         private void LogInternal(LogLevel level, string message)
@@ -287,8 +291,13 @@ namespace Hillinworks.OperationFramework
 
         private void OnCancelled()
         {
+            foreach (var child in this.Children.Where(c => !c.IsCancelled && !c.IsCompleted && !c.IsFailed))
+            {
+                child.Cancel();
+            }
+
             this.IsCancelled = true;
-            this.RaiseOperationEvent(h => h.OnCompleted());
+            this.RaiseOperationEvent(h => h.OnCancelled());
             this.Cancelled?.Invoke(this, EventArgs.Empty);
         }
 
