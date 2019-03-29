@@ -370,5 +370,10 @@ namespace Hillinworks.OperationFramework
                 throw;  // should not reach here
             }
         }
+
+        void IProgress<double>.Report(double value)
+        {
+            this.ReportProgress(value);
+        }
     }
 }
