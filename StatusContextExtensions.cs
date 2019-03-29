@@ -125,18 +125,18 @@ namespace Hillinworks.OperationFramework
             double progressShare = 0,
             bool shareCancellation = true)
         {
-            context.StartChildOperation(name, operation.Execute, progressShare, shareCancellation);
+            context.StartChildOperation(name, operation.ExecuteAsync, progressShare, shareCancellation);
         }
 
         [DebuggerStepThrough]
-        public static TResult StartChildOperation<TResult>(
+        public static Task<TResult> StartChildOperation<TResult>(
             this IOperationContext context,
             string name,
             IOperation<TResult> operation,
             double progressShare = 0,
             bool shareCancellation = true)
         {
-            return context.StartChildOperation(name, operation.Execute, progressShare, shareCancellation);
+            return context.StartChildOperation(name, operation.ExecuteAsync, progressShare, shareCancellation);
         }
 
         [DebuggerStepThrough]
@@ -151,7 +151,7 @@ namespace Hillinworks.OperationFramework
         }
 
         [DebuggerStepThrough]
-        public static TResult StartChildOperation<TOperation, TResult>(
+        public static Task<TResult> StartChildOperation<TOperation, TResult>(
             this IOperationContext context,
             string name,
             double progressShare = 0,

@@ -143,12 +143,13 @@ namespace Hillinworks.OperationFramework
             return @event;
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// Commit this operation and mark it as completed.
         /// </summary>
         /// <remarks>
         /// This can be called if you want to manually control the completion of an operation.
-        /// For <see cref="IOperation.Execute(IOperationContext)"/> based operations, this will be
+        /// For <see cref="M:Hillinworks.OperationFramework.IOperation.ExecuteAsync(Hillinworks.OperationFramework.IOperationContext)" /> based operations, this will be
         /// automatically called when the execution is finished without exception.
         /// </remarks>
         public void Commit()
@@ -317,51 +318,11 @@ namespace Hillinworks.OperationFramework
             }
         }
 
-        public void Execute(IOperation operation)
-        {
-            try
-            {
-                operation.Execute(this);
-                this.Commit();
-            }
-            catch (OperationCanceledException ex)
-            {
-                this.LogInfo($"Execution has been cancelled: {ex.Message}");
-                this.OnCancelled();
-                throw;
-            }
-            catch (Exception ex)
-            {
-                this.OnFatalError($"Exception occurred when executing operation: {ex.Message}", ex);
-            }
-        }
-
-        public T Execute<T>(IOperation<T> operation)
-        {
-            try
-            {
-                var result = operation.Execute(this);
-                this.Commit();
-                return result;
-            }
-            catch (OperationCanceledException ex)
-            {
-                this.LogInfo($"Execution has been cancelled: {ex.Message}");
-                this.OnCancelled();
-                throw;
-            }
-            catch (Exception ex)
-            {
-                this.OnFatalError($"Exception occurred when executing operation: {ex.Message}", ex);
-                throw;  // should not reach here
-            }
-        }
-
         public async Task ExecuteAsync(IOperation operation)
         {
             try
             {
-                await Task.Run(() => operation.Execute(this), this.CancellationToken);
+                await operation.ExecuteAsync(this);
                 this.Commit();
             }
             catch (OperationCanceledException ex)
@@ -380,7 +341,7 @@ namespace Hillinworks.OperationFramework
         {
             try
             {
-                var result = await Task.Run(() => operation.Execute(this), this.CancellationToken);
+                var result = await operation.ExecuteAsync(this);
                 this.Commit();
                 return result;
             }

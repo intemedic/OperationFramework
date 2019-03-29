@@ -1,12 +1,14 @@
-﻿namespace Hillinworks.OperationFramework
+﻿using System.Threading.Tasks;
+
+namespace Hillinworks.OperationFramework
 {
 	public interface IOperation
 	{
-		void Execute(IOperationContext statusContext);
+		Task ExecuteAsync(IOperationContext statusContext);
 	}
 
-	public interface IOperation<out TResult>
+	public interface IOperation<TResult>
 	{
-		TResult Execute(IOperationContext context);
+		Task<TResult> ExecuteAsync(IOperationContext context);
 	}
 }
